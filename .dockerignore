@@ -1,0 +1,12 @@
+.git
+node_modules
+vendor
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/logs/*
+.env
+Dockerfile
+render.yaml
+install.sql
+.htaccess
