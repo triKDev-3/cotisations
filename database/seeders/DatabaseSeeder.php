@@ -16,48 +16,57 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Collecteur
-        $collecteur = User::create([
-            'name' => 'Collecteur Principal',
-            'numero_compte' => 'ADMIN01',
-            'email' => 'admin@cotisations.com',
-            'role' => 'collecteur',
-            'password' => bcrypt('password'),
-        ]);
+        $collecteur = User::updateOrCreate(
+            ['numero_compte' => 'ADMIN01'],
+            [
+                'name' => 'Collecteur Principal',
+                'email' => 'admin@cotisations.com',
+                'role' => 'collecteur',
+                'password' => bcrypt('password'),
+            ]
+        );
 
         // Jeune standard
-        $jeune = User::create([
-            'name' => 'Jean Dupont',
-            'numero_compte' => 'JEUNE01',
-            'email' => 'jean@example.com',
-            'role' => 'jeune',
-            'password' => bcrypt('password'),
-        ]);
+        $jeune = User::updateOrCreate(
+            ['numero_compte' => 'JEUNE01'],
+            [
+                'name' => 'Jean Dupont',
+                'email' => 'jean@example.com',
+                'role' => 'jeune',
+                'password' => bcrypt('password'),
+            ]
+        );
 
         // Jeune triK (User Request)
-        $trik = User::create([
-            'name' => 'triK',
-            'numero_compte' => 'JEUNE02',
-            'email' => 'triK@gmail.com',
-            'role' => 'jeune',
-            'password' => bcrypt('password'),
-        ]);
+        $trik = User::updateOrCreate(
+            ['numero_compte' => 'JEUNE02'],
+            [
+                'name' => 'triK',
+                'email' => 'triK@gmail.com',
+                'role' => 'jeune',
+                'password' => bcrypt('password'),
+            ]
+        );
 
-        // Cotisation Example for Jeune 1
-        \App\Models\Cotisation::create([
-            'user_id' => $jeune->id,
-            'montant' => 5000,
-            'date_paiement' => now()->subDays(2),
-            'statut' => 'payé',
-            'collecteur_id' => $collecteur->id,
-        ]);
+        // Only seed cotisations if table is empty to avoid duplicates on redeploy
+        if (\App\Models\Cotisation::count() === 0) {
+            // Cotisation Example for Jeune 1
+            \App\Models\Cotisation::create([
+                'user_id' => $jeune->id,
+                'montant' => 5000,
+                'date_paiement' => now()->subDays(2),
+                'statut' => 'payé',
+                'collecteur_id' => $collecteur->id,
+            ]);
 
-        // Cotisation Example for triK
-        \App\Models\Cotisation::create([
-            'user_id' => $trik->id,
-            'montant' => 10000,
-            'date_paiement' => now()->subDay(),
-            'statut' => 'payé',
-            'collecteur_id' => $collecteur->id,
-        ]);
+            // Cotisation Example for triK
+            \App\Models\Cotisation::create([
+                'user_id' => $trik->id,
+                'montant' => 10000,
+                'date_paiement' => now()->subDay(),
+                'statut' => 'payé',
+                'collecteur_id' => $collecteur->id,
+            ]);
+        }
     }
 }
