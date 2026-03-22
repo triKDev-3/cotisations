@@ -8,7 +8,9 @@ php artisan view:cache
 
 echo "Preparing SQLite database..."
 touch /var/www/html/database/database.sqlite
-chown www-data:www-data /var/www/html/database/database.sqlite
+chmod -R 777 /var/www/html/database
+chown -R www-data:www-data /var/www/html/database
+chmod 666 /var/www/html/database/database.sqlite
 
 echo "Running database migrations..."
 php artisan migrate --force
