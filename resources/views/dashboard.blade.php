@@ -9,7 +9,34 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
 
             <!-- Welcome Section -->
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between" x-data="{ 
+                notification: null,
+                init() {
+                    const userId = {{ Auth::id() }};
+                    const f = window.firebase;
+                    // Écoute les nouvelles cotisations en temps réel via Firestore
+                    const q = f.query(
+                        f.collection(window.db, 'cotisations'),
+                        f.where('user_id', '==', userId),
+                        f.orderBy('date_enregistrement', 'desc'),
+                        f.limit(1)
+                    );
+
+                    f.onSnapshot(q, (snapshot) => {
+                        snapshot.docChanges().forEach((change) => {
+                            if (change.type === 'added') {
+                                const data = change.doc.data();
+                                // Ne pas notifier si ça date de plus de 10 secondes (chargement initial)
+                                const now = Date.now();
+                                if (data.date_enregistrement && (now - data.date_enregistrement.toMillis() < 10000)) {
+                                    this.notification = `Nouvelle cotisation de ${data.montant.toLocaleString()} FCFA enregistrée !`;
+                                    setTimeout(() => { this.notification = null }, 5000);
+                                }
+                            }
+                        });
+                    });
+                }
+            }">
                 <div>
                     <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
                         Tableau de Bord
@@ -18,6 +45,14 @@
                         Bienvenue, {{ Auth::user()->name }} ! Voici un aperçu de vos cotisations.
                     </p>
                 </div>
+
+                <!-- Petit Toast de notification -->
+                <template x-if="notification">
+                    <div x-transition class="fixed bottom-5 right-5 bg-green-600 text-white px-6 py-3 rounded-xl shadow-2xl z-50 flex items-center gap-3 animate-bounce">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span x-text="notification"></span>
+                    </div>
+                </template>
             </div>
 
             <!-- Stats Card -->

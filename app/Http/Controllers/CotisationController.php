@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Cotisation;
 use App\Models\User;
+use App\Services\FirebaseService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -30,7 +31,7 @@ class CotisationController extends Controller
     /**
      * Store a newly created resource in storage (For Collecteur).
      */
-    public function store(Request $request)
+    public function store(Request $request, FirebaseService $firebase)
     {
         $request->validate([
             'numero_compte' => 'required|exists:users,numero_compte',
@@ -40,13 +41,21 @@ class CotisationController extends Controller
 
         $jeune = User::where('numero_compte', $request->numero_compte)->firstOrFail();
 
-        Cotisation::create([
+        $cotisation = Cotisation::create([
             'user_id' => $jeune->id,
             'montant' => $request->montant,
             'date_paiement' => $request->date_paiement,
             'collecteur_id' => Auth::id(),
             'statut' => 'payé',
         ]);
+
+        // Optionnel : Envoyer vers Firebase pour le temps réel
+        try {
+            $firebase->notifyCotisation($cotisation);
+        } catch (\Exception $e) {
+            // Log error or ignore if firebase fails
+            \Log::error("Erreur Firebase : " . $e->getMessage());
+        }
 
         return redirect()->back()->with('success', 'Cotisation enregistrée avec succès.');
     }

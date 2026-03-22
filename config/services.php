@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'firebase' => [
+        'service_account' => env('FIREBASE_SERVICE_ACCOUNT', storage_path('app/firebase-service-account.json')),
+        'project_id' => env('FIREBASE_PROJECT_ID', 'cotisation-6a6ab'),
+    ],
+
 ];

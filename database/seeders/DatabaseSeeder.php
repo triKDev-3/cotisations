@@ -15,6 +15,17 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Administrateur Racine
+        $admin = User::updateOrCreate(
+            ['numero_compte' => 'ADMINROOT'],
+            [
+                'name' => 'Administrateur Système',
+                'email' => 'admin@cotisation.com',
+                'role' => 'admin',
+                'password' => bcrypt('password'),
+            ]
+        );
+
         // Collecteur
         $collecteur = User::updateOrCreate(
             ['numero_compte' => 'ADMIN01'],
