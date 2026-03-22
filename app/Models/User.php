@@ -66,4 +66,16 @@ class User extends Authenticatable
     {
         return $this->role === 'admin';
     }
+
+    /**
+     * Génère un numéro de compte unique (format COT-XXXXXX).
+     */
+    public static function generateUniqueNumeroCompte(): string
+    {
+        do {
+            $numero = 'COT-' . str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+        } while (static::where('numero_compte', $numero)->exists());
+
+        return $numero;
+    }
 }

@@ -100,14 +100,13 @@ class CotisationController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
-            'numero_compte' => ['required', 'string', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
         ]);
 
         User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'numero_compte' => $request->numero_compte,
+            'numero_compte' => User::generateUniqueNumeroCompte(),
             'role' => 'jeune',
             'password' => \Illuminate\Support\Facades\Hash::make($request->password),
         ]);
