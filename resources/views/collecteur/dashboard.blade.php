@@ -12,13 +12,25 @@
             </div>
             
             <div class="flex items-center gap-4">
-                <div class="bg-[#161925] border border-white/5 p-4 rounded-2xl flex items-center gap-4 shadow-xl">
-                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div class="bg-[#161925] border border-white/5 p-4 rounded-2xl flex items-center gap-6 shadow-xl">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest leading-none">Collecté</p>
+                            <p class="text-lg font-bold text-white mt-1">{{ number_format($totalCollecteBrut ?? 0, 0, ',', ' ') }}</p>
+                        </div>
                     </div>
-                    <div>
-                        <p class="text-[10px] text-gray-500 uppercase font-black tracking-widest leading-none">Total Récolté</p>
-                        <p class="text-xl font-bold text-white mt-1">{{ number_format($totalCollecte ?? 0, 0, ',', ' ') }} FCFA</p>
+                    <div class="w-px h-8 bg-white/5"></div>
+                    <div class="flex items-center gap-3 text-emerald-400">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-[9px] text-emerald-500/50 uppercase font-black tracking-widest leading-none">Solde Net</p>
+                            <p class="text-lg font-black mt-1">{{ number_format($soldeGlobal ?? 0, 0, ',', ' ') }}</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -30,10 +42,10 @@
                 <div class="bg-[#161925] border border-white/5 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden group">
                     <div class="relative z-10">
                         <h3 class="text-2xl font-bold text-white mb-8 flex items-center gap-3">
-                            <span class="w-8 h-8 rounded-lg bg-indigo-500 flex items-center justify-center text-white scale-90">
+                            <span class="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-white scale-90">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
                             </span>
-                            Nouveau Versement
+                            Nouvelle Transaction
                         </h3>
 
                         @if(session('success'))
@@ -45,10 +57,23 @@
 
                         <form method="POST" action="{{ route('collecteur.cotisations.store') }}" class="space-y-8">
                             @csrf
+                            
+                            <!-- Type Selection Labels -->
+                            <div class="flex items-center gap-4 bg-black/20 p-2 rounded-2xl border border-white/5 w-fit">
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="type" value="versement" checked class="hidden peer">
+                                    <span class="px-6 py-2 rounded-xl block text-xs font-bold uppercase tracking-widest transition-all peer-checked:bg-emerald-500 peer-checked:text-white text-gray-500 hover:text-gray-300">Versement</span>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="type" value="retrait" class="hidden peer">
+                                    <span class="px-6 py-2 rounded-xl block text-xs font-bold uppercase tracking-widest transition-all peer-checked:bg-pink-600 peer-checked:text-white text-gray-500 hover:text-gray-300">Retrait</span>
+                                </label>
+                            </div>
+
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div class="col-span-1 md:col-span-2">
                                     <label class="block text-sm font-bold text-gray-500 uppercase tracking-widest mb-3 ml-2">Sélectionner le Membre</label>
-                                    <select name="numero_compte" class="w-full bg-black/20 border border-white/5 rounded-2xl py-4 px-6 text-white focus:ring-2 focus:ring-indigo-500 transition-all outline-none appearance-none">
+                                    <select name="numero_compte" required class="w-full bg-black/20 border border-white/5 rounded-2xl py-4 px-6 text-white focus:ring-2 focus:ring-emerald-500 transition-all outline-none appearance-none">
                                         <option value="" class="bg-gray-900 italic">Rechercher un membre...</option>
                                         @foreach($jeunes as $jeune)
                                             <option value="{{ $jeune->numero_compte }}" class="bg-gray-900">{{ $jeune->name }} ({{ $jeune->numero_compte }})</option>
@@ -58,53 +83,60 @@
 
                                 <div>
                                     <label class="block text-sm font-bold text-gray-500 uppercase tracking-widest mb-3 ml-2">Montant (FCFA)</label>
-                                    <input type="number" name="montant" placeholder="Ex: 5000" required class="w-full bg-black/20 border border-white/5 rounded-2xl py-4 px-6 text-white focus:ring-2 focus:ring-indigo-500 transition-all outline-none">
+                                    <input type="number" name="montant" placeholder="Ex: 5000" required class="w-full bg-black/20 border border-white/5 rounded-2xl py-4 px-6 text-white focus:ring-2 focus:ring-emerald-500 transition-all outline-none">
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-bold text-gray-500 uppercase tracking-widest mb-3 ml-2">Date d'effet</label>
-                                    <input type="date" name="date_paiement" value="{{ date('Y-m-d') }}" required class="w-full bg-black/20 border border-white/5 rounded-2xl py-4 px-6 text-white focus:ring-2 focus:ring-indigo-500 transition-all outline-none">
+                                    <input type="date" name="date_paiement" value="{{ date('Y-m-d') }}" required class="w-full bg-black/20 border border-white/5 rounded-2xl py-4 px-6 text-white focus:ring-2 focus:ring-emerald-500 transition-all outline-none">
                                 </div>
                             </div>
 
-                            <button type="submit" class="w-full md:w-auto px-10 py-5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-extrabold rounded-2xl shadow-xl shadow-indigo-500/20 transition-all duration-300 hover:scale-[1.02] flex items-center justify-center gap-3">
-                                Enregistrer la Cotisation
+                            <button type="submit" class="w-full md:w-auto px-10 py-5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold rounded-2xl shadow-xl shadow-emerald-500/20 transition-all duration-300 hover:scale-[1.02] flex items-center justify-center gap-3">
+                                Enregistrer la Transaction
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
                             </button>
                         </form>
                     </div>
                 </div>
 
-                <!-- Latest Collector Activity Table -->
+                <!-- Activity Table with badges -->
                 <div class="bg-[#161925] border border-white/5 rounded-[2.5rem] overflow-hidden">
                     <div class="px-8 py-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
-                        <h3 class="text-xl font-bold text-white tracking-tight">Activité Récente</h3>
+                        <h3 class="text-xl font-bold text-white tracking-tight">Derniers Mouvements</h3>
                     </div>
                     <div class="overflow-x-auto p-4">
                         <table class="w-full text-left">
                             <thead class="text-gray-500 text-[10px] font-black uppercase tracking-widest">
                                 <tr>
                                     <th class="px-6 py-4">Date</th>
+                                    <th class="px-6 py-4">Type</th>
                                     <th class="px-6 py-4">Membre</th>
                                     <th class="px-6 py-4">Montant</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-white/5">
-                                @forelse($historique as $encaissement)
+                                @forelse($historique as $mouvement)
                                     <tr class="hover:bg-white/[0.02] transition-colors">
-                                        <td class="px-6 py-5 text-sm font-semibold text-gray-400">{{ $encaissement->date_paiement->format('d/m/Y') }}</td>
+                                        <td class="px-6 py-5 text-sm font-semibold text-gray-400">{{ $mouvement->date_paiement->format('d/m/Y') }}</td>
                                         <td class="px-6 py-5">
-                                            <div class="flex items-center gap-3">
-                                                <div class="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-400 text-xs font-bold">
-                                                    {{ substr($encaissement->user->name ?? '?', 0, 1) }}
-                                                </div>
-                                                <span class="text-white font-bold text-sm">{{ $encaissement->user->name ?? 'Inconnu' }}</span>
-                                            </div>
+                                            @if($mouvement->type == 'versement')
+                                                <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block mr-2 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+                                                <span class="text-[10px] font-bold text-emerald-500 uppercase">IN</span>
+                                            @else
+                                                <span class="w-2 h-2 rounded-full bg-pink-500 inline-block mr-2 shadow-[0_0_8px_rgba(236,72,153,0.5)]"></span>
+                                                <span class="text-[10px] font-bold text-pink-500 uppercase">OUT</span>
+                                            @endif
                                         </td>
-                                        <td class="px-6 py-5 text-white font-black text-sm">{{ number_format($encaissement->montant, 0, ',', ' ') }} FCFA</td>
+                                        <td class="px-6 py-5">
+                                            <span class="text-white font-bold text-sm">{{ $mouvement->user->name ?? 'Inconnu' }}</span>
+                                        </td>
+                                        <td class="px-6 py-5 text-white font-black text-sm @if($mouvement->type == 'retrait') text-pink-400 @endif">
+                                            {{ $mouvement->type == 'retrait' ? '-' : '+' }} {{ number_format($mouvement->montant, 0, ',', ' ') }}
+                                        </td>
                                     </tr>
                                 @empty
-                                    <tr><td colspan="3" class="px-6 py-10 text-center text-gray-600 italic">Aucune donnée</td></tr>
+                                    <tr><td colspan="4" class="px-6 py-10 text-center text-gray-600 italic">Aucune donnée</td></tr>
                                 @endforelse
                             </tbody>
                         </table>

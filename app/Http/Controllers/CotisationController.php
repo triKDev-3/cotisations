@@ -10,9 +10,6 @@ use Illuminate\Support\Facades\Auth;
 
 class CotisationController extends Controller
 {
-    /**
-     * Display a listing of the resource (For Jeune).
-     */
     public function index()
     {
         $user = Auth::user();
@@ -23,9 +20,12 @@ class CotisationController extends Controller
         }
 
         $cotisations = $user->cotisations()->orderBy('date_paiement', 'desc')->get();
-        $totalPaye = $cotisations->where('statut', 'payé')->sum('montant');
+        
+        $totalPaye = $cotisations->where('type', 'versement')->sum('montant');
+        $totalRetires = $cotisations->where('type', 'retrait')->sum('montant');
+        $solde = $totalPaye - $totalRetires;
 
-        return view('dashboard', compact('cotisations', 'totalPaye'));
+        return view('dashboard', compact('cotisations', 'totalPaye', 'totalRetires', 'solde'));
     }
 
     /**
@@ -36,6 +36,7 @@ class CotisationController extends Controller
         $request->validate([
             'numero_compte' => 'required|exists:users,numero_compte',
             'montant' => 'required|numeric|min:1',
+            'type' => 'required|in:versement,retrait',
             'date_paiement' => 'required|date',
         ]);
 
@@ -44,6 +45,7 @@ class CotisationController extends Controller
         $cotisation = Cotisation::create([
             'user_id' => $jeune->id,
             'montant' => $request->montant,
+            'type' => $request->type,
             'date_paiement' => $request->date_paiement,
             'collecteur_id' => Auth::id(),
             'statut' => 'payé',
@@ -57,30 +59,29 @@ class CotisationController extends Controller
             \Log::error("Erreur Firebase : " . $e->getMessage());
         }
 
-        return redirect()->back()->with('success', 'Cotisation enregistrée avec succès.');
+        $msg = ($request->type == 'versement') ? 'Versement enregistré avec succès.' : 'Retrait enregistré avec succès.';
+        return redirect()->back()->with('success', $msg);
     }
 
-    /**
-     * Dashboard for Collecteur.
-     */
     public function collecteurDashboard()
     {
         $jeunes = User::where('role', 'jeune')->get();
-        // Calculate total collected by this collector or global? 
-        // Prompt says "Total collecté, Mon solde". 
-        // "Total collecté" might be global or by this collector. I'll show by this collector for "Mon solde" context maybe?
-        // Or "Total collecté" = Total collected by everyone, "Mon solde" = ? 
-        // Let's simplified: Total collected by this user.
+        
+        $stats = Cotisation::selectRaw("
+            SUM(CASE WHEN type = 'versement' THEN montant ELSE 0 END) as total_versements,
+            SUM(CASE WHEN type = 'retrait' THEN montant ELSE 0 END) as total_retraits
+        ")->first();
 
-        $totalCollecte = Cotisation::where('collecteur_id', Auth::id())->sum('montant');
+        $totalCollecteBrut = $stats->total_versements ?? 0;
+        $totalRetraits = $stats->total_retraits ?? 0;
+        $soldeGlobal = $totalCollecteBrut - $totalRetraits;
 
-        $historique = Cotisation::where('collecteur_id', Auth::id())
-            ->with('user')
+        $historique = Cotisation::with('user')
             ->orderBy('date_enregistrement', 'desc')
             ->take(10)
             ->get();
 
-        return view('collecteur.dashboard', compact('jeunes', 'totalCollecte', 'historique'));
+        return view('collecteur.dashboard', compact('jeunes', 'totalCollecteBrut', 'totalRetraits', 'soldeGlobal', 'historique'));
     }
 
     /**

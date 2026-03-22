@@ -12,6 +12,7 @@ class Cotisation extends Model
     protected $fillable = [
         'user_id',
         'montant',
+        'type',
         'date_paiement',
         'statut',
         'collecteur_id',
