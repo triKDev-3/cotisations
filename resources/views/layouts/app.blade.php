@@ -16,9 +16,42 @@
         body { font-family: 'Outfit', sans-serif; }
         .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); }
         .glass-dark { background: rgba(0, 0, 0, 0.2); backdrop-filter: blur(20px); }
+
+        /* Splash Screen Styles */
+        #splash-screen {
+            position: fixed; inset: 0; background: #0f111a; z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.8s ease, visibility 0.8s;
+        }
+        #splash-screen.fade-out { opacity: 0; visibility: hidden; }
+        .spinner-glow {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: conic-gradient(from 0deg, transparent, #6366f1);
+            mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 0);
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
+    <script>
+        window.addEventListener('load', () => {
+            const splash = document.getElementById('splash-screen');
+            setTimeout(() => {
+                splash.classList.add('fade-out');
+            }, 600); // Petit délai pour l'effet "WOW"
+        });
+    </script>
 </head>
 <body class="bg-[#0f111a] text-gray-200 antialiased overflow-x-hidden">
+    <!-- Splash Screen -->
+    <div id="splash-screen">
+        <div class="relative flex items-center justify-center">
+            <div class="spinner-glow"></div>
+            <div class="absolute w-12 h-12 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center shadow-2xl shadow-indigo-500/40">
+                <svg class="w-7 h-7 text-white animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+            </div>
+        </div>
+        <p class="mt-8 text-sm font-black uppercase tracking-[0.4em] text-gray-500 animate-pulse">Initialisation...</p>
+    </div>
     
     <div class="flex h-screen overflow-hidden">
         
