@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,34 +7,104 @@
 
     <title>{{ config('app.name', 'Cotisation') }}</title>
 
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        body { font-family: 'Outfit', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); }
+        .glass-dark { background: rgba(0, 0, 0, 0.2); backdrop-filter: blur(20px); }
+    </style>
 </head>
+<body class="bg-[#0f111a] text-gray-200 antialiased overflow-x-hidden">
+    
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- Sidebar -->
+        <aside class="w-72 flex-shrink-0 bg-[#161925] border-r border-white/5 flex flex-col hidden lg:flex">
+            <!-- Sidebar Header -->
+            <div class="p-8">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                    </div>
+                    <span class="text-xl font-extrabold tracking-tight text-white">{{ config('app.name') }}</span>
+                </div>
+            </div>
 
-<body class="font-sans antialiased">
-    <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
-        @include('layouts.navigation')
+            <!-- Navigation Links -->
+            <nav class="flex-grow px-4 space-y-2 mt-4">
+                <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all @if(request()->routeIs('dashboard')) bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 @else text-gray-500 hover:text-gray-300 hover:bg-white/5 @endif">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                    <span class="font-semibold">Tableau de Bord</span>
+                </a>
 
-        <!-- Page Heading -->
-        @isset($header)
-            <header class="bg-white dark:bg-gray-800 shadow">
-                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                    {{ $header }}
+                @if(Auth::user()->isCollecteur())
+                    <a href="{{ route('collecteur.dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all @if(request()->routeIs('collecteur.dashboard')) bg-purple-500/10 text-purple-400 border border-purple-500/20 @else text-gray-500 hover:text-gray-300 hover:bg-white/5 @endif">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span class="font-semibold">Espace Collecte</span>
+                    </a>
+                @endif
+                
+                <!-- Divider -->
+                <div class="h-px bg-white/5 my-6 mx-4"></div>
+
+                <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-4 py-3 rounded-2xl text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    <span class="font-semibold">Profil</span>
+                </a>
+            </nav>
+
+            <!-- Sidebar Footer -->
+            <div class="p-6">
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="w-full flex items-center justify-center gap-2 px-6 py-4 bg-red-500/10 text-red-500 rounded-2xl hover:bg-red-500 hover:text-white transition-all duration-300 font-bold text-sm">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                        Déconnexion
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-grow flex flex-col min-w-0 bg-[#0f111a] relative">
+            
+            <!-- Top Header -->
+            <header class="h-24 flex items-center justify-between px-8 border-b border-white/5 bg-[#0f111a]/80 backdrop-blur-md sticky top-0 z-40">
+                <div class="flex items-center gap-4">
+                    <h2 class="text-2xl font-bold text-white tracking-tight">
+                        @isset($header) {{ $header }} @else {{ __('Dashboard') }} @endisset
+                    </h2>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <!-- User Widget -->
+                    <div class="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-2xl border border-white/5">
+                        <div class="text-right hidden sm:block">
+                            <p class="text-sm font-bold text-white">{{ Auth::user()->name }}</p>
+                            <p class="text-[10px] text-gray-500 uppercase tracking-widest">{{ Auth::user()->role }}</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold border border-indigo-500/20">
+                            {{ substr(Auth::user()->name, 0, 1) }}
+                        </div>
+                    </div>
                 </div>
             </header>
-        @endisset
 
-        <!-- Page Content -->
-        <main>
-            {{ $slot }}
+            <!-- Page Content Scroll Area -->
+            <div class="flex-grow overflow-y-auto p-8 custom-scrollbar">
+                {{ $slot }}
+            </div>
+
+            <!-- Background Decorations -->
+            <div class="fixed top-0 right-0 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none -z-10"></div>
+            <div class="fixed bottom-0 left-0 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[120px] pointer-events-none -z-10"></div>
         </main>
-    </div>
-</body>
 
+    </div>
+
+</body>
 </html>
