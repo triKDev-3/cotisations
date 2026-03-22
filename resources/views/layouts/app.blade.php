@@ -53,22 +53,39 @@
         <p class="mt-8 text-sm font-black uppercase tracking-[0.4em] text-gray-500 animate-pulse">Initialisation...</p>
     </div>
     
-    <div class="flex h-screen overflow-hidden">
+    <div class="flex h-screen overflow-hidden" x-data="{ mobileMenu: false }">
         
+        <!-- Sidebar Backdrop (Mobile only) -->
+        <div x-show="mobileMenu" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             @click="mobileMenu = false"
+             class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 lg:hidden"></div>
+
         <!-- Sidebar -->
-        <aside class="w-72 flex-shrink-0 bg-[#161925] border-r border-white/5 flex flex-col hidden lg:flex">
+        <aside :class="mobileMenu ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+               class="fixed lg:static inset-y-0 left-0 w-72 flex-shrink-0 bg-[#161925] border-r border-white/5 flex flex-col z-[60] transition-transform duration-300 ease-in-out">
+            
             <!-- Sidebar Header -->
-            <div class="p-8">
+            <div class="p-8 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
                     </div>
                     <span class="text-xl font-extrabold tracking-tight text-white">{{ config('app.name') }}</span>
                 </div>
+                <!-- Close Button (Mobile) -->
+                <button @click="mobileMenu = false" class="lg:hidden text-gray-500 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
             </div>
 
             <!-- Navigation Links -->
-            <nav class="flex-grow px-4 space-y-2 mt-4">
+            <nav class="flex-grow px-4 space-y-2 mt-4 overflow-y-auto">
                 <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all @if(request()->routeIs('dashboard')) bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 @else text-gray-500 hover:text-gray-300 hover:bg-white/5 @endif">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                     <span class="font-semibold">Tableau de Bord</span>
@@ -106,9 +123,14 @@
         <main class="flex-grow flex flex-col min-w-0 bg-[#0f111a] relative">
             
             <!-- Top Header -->
-            <header class="h-24 flex items-center justify-between px-8 border-b border-white/5 bg-[#0f111a]/80 backdrop-blur-md sticky top-0 z-40">
+            <header class="h-24 flex items-center justify-between px-6 lg:px-8 border-b border-white/5 bg-[#0f111a]/80 backdrop-blur-md sticky top-0 z-40">
                 <div class="flex items-center gap-4">
-                    <h2 class="text-2xl font-bold text-white tracking-tight">
+                    <!-- Hamburger Menu (Mobile) -->
+                    <button @click="mobileMenu = true" class="lg:hidden p-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    </button>
+                    
+                    <h2 class="text-xl lg:text-2xl font-bold text-white tracking-tight">
                         @isset($header) {{ $header }} @else {{ __('Dashboard') }} @endisset
                     </h2>
                 </div>
@@ -116,11 +138,11 @@
                 <div class="flex items-center gap-4">
                     <!-- User Widget -->
                     <div class="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-2xl border border-white/5">
-                        <div class="text-right hidden sm:block">
-                            <p class="text-sm font-bold text-white">{{ Auth::user()->name }}</p>
-                            <p class="text-[10px] text-gray-500 uppercase tracking-widest">{{ Auth::user()->role }}</p>
+                        <div class="text-right hidden md:block">
+                            <p class="text-sm font-bold text-white leading-none">{{ Auth::user()->name }}</p>
+                            <p class="text-[9px] text-gray-500 uppercase tracking-widest mt-1">{{ Auth::user()->role }}</p>
                         </div>
-                        <div class="w-10 h-10 rounded-full @if(request()->routeIs('collecteur.*')) bg-emerald-500/20 text-emerald-400 @else bg-indigo-500/20 text-indigo-400 @endif flex items-center justify-center font-bold border border-white/5">
+                        <div class="w-9 h-9 rounded-full @if(request()->routeIs('collecteur.*')) bg-emerald-500/20 text-emerald-400 @else bg-indigo-500/20 text-indigo-400 @endif flex items-center justify-center font-black border border-white/5 text-sm">
                             {{ substr(Auth::user()->name, 0, 1) }}
                         </div>
                     </div>
@@ -128,7 +150,7 @@
             </header>
 
             <!-- Page Content Scroll Area -->
-            <div class="flex-grow overflow-y-auto p-8 custom-scrollbar">
+            <div class="flex-grow overflow-y-auto p-6 lg:p-8 custom-scrollbar">
                 {{ $slot }}
             </div>
 
