@@ -36,13 +36,13 @@
 
             <!-- Navigation Links -->
             <nav class="flex-grow px-4 space-y-2 mt-4">
-                <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all @if(request()->routeIs('dashboard')) bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 @else text-gray-500 hover:text-gray-300 hover:bg-white/5 @endif">
+                <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all @if(request()->routeIs('dashboard')) bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 @else text-gray-500 hover:text-gray-300 hover:bg-white/5 @endif">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                     <span class="font-semibold">Tableau de Bord</span>
                 </a>
 
                 @if(Auth::user()->isCollecteur())
-                    <a href="{{ route('collecteur.dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all @if(request()->routeIs('collecteur.dashboard')) bg-purple-500/10 text-purple-400 border border-purple-500/20 @else text-gray-500 hover:text-gray-300 hover:bg-white/5 @endif">
+                    <a href="{{ route('collecteur.dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all @if(request()->routeIs('collecteur.dashboard')) bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 @else text-gray-500 hover:text-gray-300 hover:bg-white/5 @endif">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         <span class="font-semibold">Espace Collecte</span>
                     </a>
@@ -87,7 +87,7 @@
                             <p class="text-sm font-bold text-white">{{ Auth::user()->name }}</p>
                             <p class="text-[10px] text-gray-500 uppercase tracking-widest">{{ Auth::user()->role }}</p>
                         </div>
-                        <div class="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold border border-indigo-500/20">
+                        <div class="w-10 h-10 rounded-full @if(request()->routeIs('collecteur.*')) bg-emerald-500/20 text-emerald-400 @else bg-indigo-500/20 text-indigo-400 @endif flex items-center justify-center font-bold border border-white/5">
                             {{ substr(Auth::user()->name, 0, 1) }}
                         </div>
                     </div>
@@ -99,9 +99,14 @@
                 {{ $slot }}
             </div>
 
-            <!-- Background Decorations -->
-            <div class="fixed top-0 right-0 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none -z-10"></div>
-            <div class="fixed bottom-0 left-0 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[120px] pointer-events-none -z-10"></div>
+            <!-- Dynamic Background Decorations (Changes based on section) -->
+            @if(request()->routeIs('collecteur.*'))
+                <div class="fixed top-0 right-0 w-[500px] h-[500px] bg-emerald-600/10 rounded-full blur-[120px] pointer-events-none -z-10"></div>
+                <div class="fixed bottom-0 left-0 w-[500px] h-[500px] bg-teal-600/10 rounded-full blur-[120px] pointer-events-none -z-10"></div>
+            @else
+                <div class="fixed top-0 right-0 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none -z-10"></div>
+                <div class="fixed bottom-0 left-0 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[120px] pointer-events-none -z-10"></div>
+            @endif
         </main>
 
     </div>
