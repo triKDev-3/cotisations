@@ -12,19 +12,29 @@ class FirebaseService
     public function __construct()
     {
         $serviceAccount = config('services.firebase.service_account');
+        $projectId = config('services.firebase.project_id');
 
         $factory = (new Factory);
+        if ($projectId) {
+            $factory = $factory->withProjectId($projectId);
+        }
         
         // Si le serviceAccount est un chemin vers un fichier JSON
         if (is_string($serviceAccount) && file_exists($serviceAccount)) {
             $factory = $factory->withServiceAccount($serviceAccount);
         } 
         // Sinon, on tente de le charger comme un JSON brut (pour .env string)
-        elseif (is_string($serviceAccount) && str_starts_with($serviceAccount, '{')) {
+        elseif (is_string($serviceAccount) && str_starts_with(trim((string)$serviceAccount), '{')) {
             $factory = $factory->withServiceAccount(json_decode($serviceAccount, true));
         }
 
-        $this->firestore = $factory->createFirestore();
+        try {
+            $this->firestore = $factory->createFirestore();
+        } catch (\Exception $e) {
+            // Si la config est manquante sur Render, on ne stoppe pas l'appli
+            logger()->error("Erreur Firebase: " . $e->getMessage());
+            $this->firestore = null;
+        }
     }
 
     public function getFirestore()
@@ -37,6 +47,8 @@ class FirebaseService
      */
     public function notifyCotisation($cotisation)
     {
+        if (!$this->firestore) return;
+
         $database = $this->firestore->database();
         $database->collection('cotisations')->add([
             'id' => $cotisation->id,
