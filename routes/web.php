@@ -18,6 +18,7 @@ Route::middleware(['auth', 'collecteur'])->prefix('collecteur')->name('collecteu
     Route::post('/cotisations', [CotisationController::class, 'store'])->name('cotisations.store');
     Route::get('/jeunes/create', [CotisationController::class, 'createJeune'])->name('jeunes.create');
     Route::post('/jeunes', [CotisationController::class, 'storeJeune'])->name('jeunes.store');
+    Route::get('/jeunes/{user}', [CotisationController::class, 'showJeune'])->name('jeunes.show');
     Route::get('/jeunes/{user}/edit', [CotisationController::class, 'editJeune'])->name('jeunes.edit');
     Route::put('/jeunes/{user}', [CotisationController::class, 'updateJeune'])->name('jeunes.update');
     Route::delete('/jeunes/{user}', [CotisationController::class, 'destroyJeune'])->name('jeunes.destroy');

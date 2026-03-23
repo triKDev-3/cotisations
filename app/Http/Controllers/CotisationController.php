@@ -115,6 +115,20 @@ class CotisationController extends Controller
     }
 
     /**
+     * Show details of a Jeune (Transactions and balance).
+     */
+    public function showJeune(User $user)
+    {
+        $cotisations = $user->cotisations()->orderBy('date_paiement', 'desc')->get();
+        
+        $totalPaye = $user->cotisations()->where('type', 'versement')->sum('montant');
+        $totalRetires = $user->cotisations()->where('type', 'retrait')->sum('montant');
+        $solde = $totalPaye - $totalRetires;
+
+        return view('collecteur.show_jeune', compact('user', 'cotisations', 'totalPaye', 'totalRetires', 'solde'));
+    }
+
+    /**
      * Show form to edit a Jeune.
      */
     public function editJeune(User $user)

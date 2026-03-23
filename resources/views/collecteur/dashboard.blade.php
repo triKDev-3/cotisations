@@ -155,7 +155,7 @@
                     </div>
                     <div class="overflow-y-auto flex-grow p-4 space-y-3 custom-scrollbar">
                         @foreach($jeunes as $jeune)
-                            <a href="{{ route('collecteur.jeunes.edit', $jeune) }}" class="flex items-center gap-4 p-4 rounded-3xl hover:bg-white/5 transition-all group">
+                            <a href="{{ route('collecteur.jeunes.show', $jeune) }}" class="flex items-center gap-4 p-4 rounded-3xl hover:bg-white/5 transition-all group">
                                 <div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-gray-500 font-bold group-hover:bg-indigo-500/10 group-hover:text-indigo-400">
                                     {{ substr($jeune->name, 0, 1) }}
                                 </div>
