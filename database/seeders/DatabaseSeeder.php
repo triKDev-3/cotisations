@@ -17,46 +17,46 @@ class DatabaseSeeder extends Seeder
     {
         // Administrateur Racine
         $admin = User::updateOrCreate(
-            ['numero_compte' => 'ADMINROOT'],
-            [
-                'name' => 'Administrateur Système',
-                'email' => 'admin@cotisation.com',
-                'role' => 'admin',
-                'password' => bcrypt('password'),
-            ]
+        ['numero_compte' => 'ADMINROOT'],
+        [
+            'name' => 'Administrateur Système',
+            'email' => 'kodokoffikevin.com',
+            'role' => 'admin',
+            'password' => bcrypt('#Kevin7389'),
+        ]
         );
 
         // Collecteur
         $collecteur = User::updateOrCreate(
-            ['numero_compte' => 'ADMIN01'],
-            [
-                'name' => 'Collecteur Principal',
-                'email' => 'admin@cotisations.com',
-                'role' => 'collecteur',
-                'password' => bcrypt('password'),
-            ]
+        ['numero_compte' => 'ADMIN01'],
+        [
+            'name' => 'Collecteur Principal',
+            'email' => 'admin@cotisations.com',
+            'role' => 'collecteur',
+            'password' => bcrypt('#Johny1234'),
+        ]
         );
 
         // Jeune standard
         $jeune = User::updateOrCreate(
-            ['numero_compte' => 'JEUNE01'],
-            [
-                'name' => 'Jean Dupont',
-                'email' => 'jean@example.com',
-                'role' => 'jeune',
-                'password' => bcrypt('password'),
-            ]
+        ['numero_compte' => 'JEUNE01'],
+        [
+            'name' => 'Jean Dupont',
+            'email' => 'jean@example.com',
+            'role' => 'jeune',
+            'password' => bcrypt('password'),
+        ]
         );
 
         // Jeune triK (User Request)
         $trik = User::updateOrCreate(
-            ['numero_compte' => 'JEUNE02'],
-            [
-                'name' => 'triK',
-                'email' => 'triK@gmail.com',
-                'role' => 'jeune',
-                'password' => bcrypt('password'),
-            ]
+        ['numero_compte' => 'JEUNE02'],
+        [
+            'name' => 'triK',
+            'email' => 'triK@gmail.com',
+            'role' => 'jeune',
+            'password' => bcrypt('password'),
+        ]
         );
 
         // Only seed cotisations if table is empty to avoid duplicates on redeploy
