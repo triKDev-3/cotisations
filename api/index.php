@@ -1,4 +1,7 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 // Vercel only allows writing to /tmp
 $_ENV['VIEW_COMPILED_PATH'] = '/tmp';
 
