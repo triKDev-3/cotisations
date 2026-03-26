@@ -1,4 +1,5 @@
 <?php
+echo "Hello from Vercel PHP!"; die();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
