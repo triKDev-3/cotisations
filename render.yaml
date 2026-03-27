@@ -14,13 +14,13 @@ services:
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_HOST
-        value: db.syfesygugazxdqbudylg.supabase.co
+        value: ep-crimson-grass-aggr998r-pooler.c-2.eu-central-1.aws.neon.tech
       - key: DB_PORT
         value: "5432"
       - key: DB_DATABASE
-        value: postgres
+        value: neondb
       - key: DB_USERNAME
-        value: postgres
+        value: neondb_owner
       - key: DB_PASSWORD
         sync: false # Set this in Render dashboard for security
       - key: LOG_CHANNEL
