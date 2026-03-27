@@ -1,28 +1,32 @@
 <?php
 
-// Test temporaire d'environnement
-echo "<h1>Diagnostic d'environnement Vercel</h1>";
-echo "📦 <b>PHP Version:</b> " . phpversion() . "<br>";
-echo "🐘 <b>PDO PostgreSQL:</b> " . (extension_loaded('pdo_pgsql') ? '✅ Disponible' : '❌ Non installé') . "<br>";
-
-$autoload = __DIR__ . '/../vendor/autoload.php';
-if (file_exists($autoload)) {
-    echo "📄 <b>Autoload:</b> ✅ Présent (" . realpath($autoload) . ")<br>";
-} else {
-    echo "📄 <b>Autoload:</b> ❌ Manquant ! (Vérifiez votre build Vercel)<br>";
+// Check for vendor/autoload
+if (!file_exists(__DIR__ . '/../vendor/autoload.php')) {
+    echo "Composer dependencies are not installed on Vercel!";
+    die();
 }
 
-// Liste des extensions importantes
-$required = ['bcmath', 'ctype', 'fileinfo', 'hash', 'mbstring', 'openssl', 'pcre', 'pdo', 'session', 'tokenizer', 'xml'];
-echo "<h2>Extensions requises pour Laravel:</h2><ul>";
-foreach ($required as $ext) {
-    echo "<li>$ext: " . (extension_loaded($ext) ? '✅' : '❌') . "</li>";
+// Laravel needs a writable folder for storage
+// Vercel only provides /tmp
+$storagePath = '/tmp/storage';
+if (!is_dir($storagePath)) {
+    @mkdir($storagePath, 0777, true);
+    @mkdir($storagePath . '/framework/views', 0777, true);
+    @mkdir($storagePath . '/framework/sessions', 0777, true);
+    @mkdir($storagePath . '/framework/cache', 0777, true);
+    @mkdir($storagePath . '/app', 0777, true);
+    @mkdir($storagePath . '/logs', 0777, true);
 }
-echo "</ul>";
 
-echo "<hr><h3>Variables d'environnement (Filtrées):</h3>";
-echo "APP_ENV: " . getenv('APP_ENV') . "<br>";
-echo "DB_CONNECTION: " . getenv('DB_CONNECTION') . "<br>";
-echo "DB_HOST: " . getenv('DB_HOST') . "<br>";
+// Ensure critical folders exist every time
+@mkdir($storagePath . '/framework/views', 0777, true);
 
-die("<br><b>Fin du diagnostic.</b>");
+// Force environment variables for Vercel
+putenv('APP_ENV=production');
+putenv('APP_DEBUG=true');
+putenv('VIEW_COMPILED_PATH=' . $storagePath . '/framework/views');
+putenv('SESSION_DRIVER=cookie');
+putenv('LOG_CHANNEL=stderr');
+$_ENV['APP_STORAGE_PATH'] = $storagePath;
+
+require __DIR__ . '/../public/index.php';
