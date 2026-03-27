@@ -10,10 +10,10 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', [CotisationController::class, 'index'])
-    ->middleware(['auth', 'verified'])
+    ->middleware(['neon.auth'])
     ->name('dashboard');
 
-Route::middleware(['auth', 'collecteur'])->prefix('collecteur')->name('collecteur.')->group(function () {
+Route::middleware(['neon.auth', 'collecteur'])->prefix('collecteur')->name('collecteur.')->group(function () {
     Route::get('/dashboard', [CotisationController::class, 'collecteurDashboard'])->name('dashboard');
     Route::post('/cotisations', [CotisationController::class, 'store'])->name('cotisations.store');
     Route::get('/jeunes/create', [CotisationController::class, 'createJeune'])->name('jeunes.create');
@@ -24,10 +24,10 @@ Route::middleware(['auth', 'collecteur'])->prefix('collecteur')->name('collecteu
     Route::delete('/jeunes/{user}', [CotisationController::class, 'destroyJeune'])->name('jeunes.destroy');
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware('neon.auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__ . '/auth.php';
+// require __DIR__ . '/auth.php';

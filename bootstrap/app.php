@@ -12,8 +12,12 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
+        $middleware->validateCsrfTokens(except: [
+            '*', // Tout désactiver si on passe en 100% JWT/stateless
+        ]);
         $middleware->alias([
             'collecteur' => \App\Http\Middleware\EnsureUserIsCollecteurOrAdmin::class,
+            'neon.auth' => \App\Http\Middleware\NeonAuthMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
