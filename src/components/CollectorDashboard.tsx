@@ -21,7 +21,13 @@ export default function CollectorDashboard() {
   const [activeTab, setActiveTab] = useState<'cotisations' | 'retraits'>('cotisations');
   const [showHistory, setShowHistory] = useState(false);
   const [showCreateUserModal, setShowCreateUserModal] = useState(false);
-  const [newUser, setNewUser] = useState({ name: '', email: '', numero_compte: '' });
+  const [newUser, setNewUser] = useState({ name: '', email: '', numero_compte: generateNumeroCompte() });
+  const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
+
+  const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 4000);
+  };
 
   const fetchData = async () => {
     try {
@@ -67,8 +73,10 @@ export default function CollectorDashboard() {
       setShowModal(null);
       resetForm();
       fetchData();
-    } catch (error) {
+      showToast('Cotisation enregistrée avec succès !');
+    } catch (error: any) {
       console.error(error);
+      showToast(error?.message || 'Erreur lors de l\'enregistrement de la cotisation.', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -90,8 +98,10 @@ export default function CollectorDashboard() {
       setShowModal(null);
       resetForm();
       fetchData();
-    } catch (error) {
+      showToast('Retrait enregistré avec succès !');
+    } catch (error: any) {
       console.error(error);
+      showToast(error?.message || 'Erreur lors de l\'enregistrement du retrait.', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -118,10 +128,12 @@ export default function CollectorDashboard() {
       };
       await api.syncUser(profile);
       setShowCreateUserModal(false);
-      setNewUser({ name: '', email: '', numero_compte: '' });
+      setNewUser({ name: '', email: '', numero_compte: generateNumeroCompte() });
       fetchData();
-    } catch (error) {
+      showToast('Membre créé avec succès !');
+    } catch (error: any) {
       console.error(error);
+      showToast(error?.message || 'Erreur lors de la création du membre.', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -129,6 +141,23 @@ export default function CollectorDashboard() {
 
   return (
     <div className="space-y-8">
+      {/* Toast */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className={`fixed top-5 right-5 z-[100] flex items-center gap-3 px-5 py-4 rounded-2xl shadow-xl text-white font-medium ${
+              toast.type === 'success' ? 'bg-emerald-600' : 'bg-red-600'
+            }`}
+          >
+            {toast.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+            {toast.msg}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Espace Collecteur</h1>
