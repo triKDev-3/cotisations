@@ -11,7 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = parseInt(process.env.PORT || '3000', 10);
 
 app.use(express.json());
 app.use(cors());
@@ -144,14 +144,14 @@ app.use(cors());
       appType: 'spa',
     }).then((vite) => {
       app.use(vite.middlewares);
-      app.listen(process.env.PORT || 3000, '0.0.0.0', () => {
-        console.log(`Server running on http://localhost:${process.env.PORT || 3000}`);
+      app.listen(PORT, '0.0.0.0', () => {
+        console.log(`Server running on http://localhost:${PORT}`);
       });
     });
   } else {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
-    app.get('*', (req, res) => {
+    app.get('*', (_req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }
