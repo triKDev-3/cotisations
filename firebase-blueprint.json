@@ -1,0 +1,62 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Utilisateur de l'application (jeune, collecteur ou admin).",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "ID unique de l'utilisateur." },
+        "name": { "type": "string", "description": "Nom complet." },
+        "email": { "type": "string", "format": "email", "description": "Adresse email." },
+        "numero_compte": { "type": "string", "description": "Numéro de compte unique (COT-XXXXXX)." },
+        "role": { "type": "string", "enum": ["admin", "collecteur", "user"], "description": "Rôle de l'utilisateur." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Date de création." }
+      },
+      "required": ["uid", "name", "email", "numero_compte", "role"]
+    },
+    "Cotisation": {
+      "title": "Cotisation",
+      "description": "Enregistrement d'une cotisation.",
+      "type": "object",
+      "properties": {
+        "user_id": { "type": "string", "description": "ID de l'utilisateur qui cotise." },
+        "collecteur_id": { "type": "string", "description": "ID du collecteur qui a enregistré la cotisation." },
+        "montant": { "type": "number", "description": "Montant de la cotisation." },
+        "type": { "type": "string", "description": "Type de cotisation (ex: mensuelle, exceptionnelle)." },
+        "date_paiement": { "type": "string", "format": "date-time", "description": "Date du paiement." },
+        "statut": { "type": "string", "enum": ["valide", "en_attente", "annule"], "description": "Statut de la cotisation." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Date d'enregistrement." }
+      },
+      "required": ["user_id", "collecteur_id", "montant", "date_paiement", "statut"]
+    },
+    "Retrait": {
+      "title": "Retrait",
+      "description": "Enregistrement d'un retrait de fonds.",
+      "type": "object",
+      "properties": {
+        "user_id": { "type": "string", "description": "ID de l'utilisateur qui retire." },
+        "admin_id": { "type": "string", "description": "ID de l'admin/collecteur qui a validé le retrait." },
+        "montant": { "type": "number", "description": "Montant du retrait." },
+        "motif": { "type": "string", "description": "Motif du retrait." },
+        "date_retrait": { "type": "string", "format": "date-time", "description": "Date du retrait." },
+        "statut": { "type": "string", "enum": ["valide", "en_attente", "annule"], "description": "Statut du retrait." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Date d'enregistrement." }
+      },
+      "required": ["user_id", "admin_id", "montant", "date_retrait", "statut"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": {
+      "schema": "User",
+      "description": "Profils utilisateurs."
+    },
+    "/cotisations/{id}": {
+      "schema": "Cotisation",
+      "description": "Liste des cotisations."
+    },
+    "/retraits/{id}": {
+      "schema": "Retrait",
+      "description": "Liste des retraits."
+    }
+  }
+}

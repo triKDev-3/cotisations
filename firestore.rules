@@ -1,0 +1,129 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {uid}
+    // Fields:
+    //   - uid: string (required) - ID unique de l'utilisateur.
+    //   - name: string (required) - Nom complet.
+    //   - email: string (required, email format) - Adresse email.
+    //   - numero_compte: string (required) - Numéro de compte unique (COT-XXXXXX).
+    //   - role: string (required, enum: admin, collecteur, user) - Rôle de l'utilisateur.
+    //   - createdAt: timestamp (optional) - Date de création.
+    //
+    // Collection: cotisations
+    // Document ID: {id}
+    // Fields:
+    //   - user_id: string (required) - ID de l'utilisateur qui cotise.
+    //   - collecteur_id: string (required) - ID du collecteur qui a enregistré la cotisation.
+    //   - montant: number (required) - Montant de la cotisation.
+    //   - type: string (required) - Type de cotisation (ex: mensuelle, exceptionnelle).
+    //   - date_paiement: timestamp (required) - Date du paiement.
+    //   - statut: string (required, enum: valide, en_attente, annule) - Statut de la cotisation.
+    //   - createdAt: timestamp (optional) - Date d'enregistrement.
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+         request.auth.token.email == "kodokoffikevin@gmail.com");
+    }
+
+    function isCollecteur() {
+      return isAuthenticated() && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'collecteur' || isAdmin());
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'name', 'email', 'numero_compte', 'role']) &&
+             data.uid is string && data.uid.size() > 0 &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.email is string && data.email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$") &&
+             data.numero_compte is string && data.numero_compte.matches("^COT-\\d{6}$") &&
+             data.role in ['admin', 'collecteur', 'user'];
+    }
+
+    function isValidCotisation(data) {
+      return data.keys().hasAll(['user_id', 'collecteur_id', 'montant', 'date_paiement', 'statut']) &&
+             data.user_id is string && data.user_id.size() > 0 &&
+             data.collecteur_id is string && data.collecteur_id.size() > 0 &&
+             data.montant is number && data.montant > 0 &&
+             data.date_paiement is timestamp &&
+             data.statut in ['valide', 'en_attente', 'annule'];
+    }
+
+    function isValidRetrait(data) {
+      return data.keys().hasAll(['user_id', 'admin_id', 'montant', 'date_retrait', 'statut']) &&
+             data.user_id is string && data.user_id.size() > 0 &&
+             data.admin_id is string && data.admin_id.size() > 0 &&
+             data.montant is number && data.montant > 0 &&
+             data.date_retrait is timestamp &&
+             data.statut in ['valide', 'en_attente', 'annule'];
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      // Les utilisateurs peuvent lire leur propre profil ou les collecteurs peuvent lire tous les profils
+      allow read: if isOwner(userId) || isCollecteur();
+      
+      // Seuls les admins peuvent créer des profils ou les utilisateurs peuvent créer leur propre profil (lors de l'inscription)
+      allow create: if isAuthenticated() && isValidUser(request.resource.data) && 
+                      (isOwner(userId) || isAdmin());
+      
+      // Seuls les admins peuvent modifier les rôles, les utilisateurs peuvent modifier leur nom
+      allow update: if isAuthenticated() && isValidUser(request.resource.data) && 
+                      (isOwner(userId) || isAdmin()) &&
+                      (request.resource.data.role == resource.data.role || isAdmin());
+      
+      allow delete: if isAdmin();
+    }
+
+    match /cotisations/{cotisationId} {
+      // Les utilisateurs peuvent lire leurs propres cotisations ou les collecteurs peuvent lire toutes les cotisations
+      allow read: if isAuthenticated() && 
+                    (request.auth.uid == resource.data.user_id || isCollecteur());
+      
+      // Seuls les collecteurs ou admins peuvent créer des cotisations
+      allow create: if isCollecteur() && isValidCotisation(request.resource.data);
+      
+      // Seuls les collecteurs ou admins peuvent modifier des cotisations
+      allow update: if isCollecteur() && isValidCotisation(request.resource.data);
+      
+      allow delete: if isAdmin();
+    }
+
+    match /retraits/{retraitId} {
+      // Les utilisateurs peuvent lire leurs propres retraits ou les collecteurs peuvent lire tous les retraits
+      allow read: if isAuthenticated() && 
+                    (request.auth.uid == resource.data.user_id || isCollecteur());
+      
+      // Seuls les collecteurs ou admins peuvent créer des retraits
+      allow create: if isCollecteur() && isValidRetrait(request.resource.data);
+      
+      // Seuls les collecteurs ou admins peuvent modifier des retraits
+      allow update: if isCollecteur() && isValidRetrait(request.resource.data);
+      
+      allow delete: if isAdmin();
+    }
+  }
+}
