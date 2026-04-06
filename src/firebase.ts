@@ -25,7 +25,8 @@ export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : nul
 export interface UserProfile {
   uid: string;
   name: string;
-  email: string;
+  email?: string;
+  phone?: string;
   numero_compte: string;
   role: 'admin' | 'collecteur' | 'user';
 }

@@ -3,10 +3,11 @@ import { pgTable, text, timestamp, doublePrecision, uuid } from 'drizzle-orm/pg-
 export const users = pgTable('users', {
   uid: text('uid').primaryKey(),
   name: text('name').notNull(),
-  email: text('email').notNull().unique(),
+  email: text('email').unique(),
   numero_compte: text('numero_compte').notNull().unique(),
   role: text('role', { enum: ['admin', 'collecteur', 'user'] }).notNull().default('user'),
   createdAt: timestamp('created_at').defaultNow(),
+  phone: text('phone'),
 });
 
 export const cotisations = pgTable('cotisations', {

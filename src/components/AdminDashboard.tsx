@@ -13,7 +13,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showTransactionsModal, setShowTransactionsModal] = useState<UserProfile | null>(null);
-  const [newUser, setNewUser] = useState({ name: '', email: '', numero_compte: '', role: 'user' as const });
+  const [newUser, setNewUser] = useState({ name: '', email: '', phone: '', numero_compte: '', role: 'user' as const });
   const [submitting, setSubmitting] = useState(false);
 
   const fetchData = async () => {
@@ -65,13 +65,14 @@ export default function AdminDashboard() {
       const profile: UserProfile = {
         uid: `manual_${Date.now()}`,
         name: newUser.name,
-        email: newUser.email,
+        email: newUser.email || undefined,
+        phone: newUser.phone || undefined,
         role: newUser.role,
         numero_compte: newUser.numero_compte || generateNumeroCompte(),
       };
       await api.syncUser(profile);
       setShowCreateModal(false);
-      setNewUser({ name: '', email: '', numero_compte: '', role: 'user' });
+      setNewUser({ name: '', email: '', phone: '', numero_compte: '', role: 'user' });
       fetchData();
     } catch (error) {
       console.error(error);
@@ -201,7 +202,12 @@ export default function AdminDashboard() {
                         <span className="text-xs text-slate-500 font-mono">{u.numero_compte}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-600">{u.email}</td>
+                    <td className="px-6 py-4 text-sm text-slate-600">
+                      <div className="flex flex-col">
+                        <span>{u.email || <span className="text-slate-300 italic">—</span>}</span>
+                        {u.phone && <span className="text-xs text-slate-400">{u.phone}</span>}
+                      </div>
+                    </td>
                     <td className="px-6 py-4">
                       <select
                         value={u.role}
@@ -277,13 +283,22 @@ export default function AdminDashboard() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-700">Email</label>
+                  <label className="text-sm font-medium text-slate-700">Email <span className="text-slate-400 font-normal">(Optionnel)</span></label>
                   <input
                     type="email"
-                    required
                     className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                     value={newUser.email}
                     onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">Téléphone <span className="text-slate-400 font-normal">(Optionnel)</span></label>
+                  <input
+                    type="tel"
+                    placeholder="Ex: +229 97 00 00 00"
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                    value={newUser.phone}
+                    onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">

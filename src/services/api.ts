@@ -13,7 +13,14 @@ export const api = {
     const res = await fetch(`${API_URL}/users/sync`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(profile),
+      body: JSON.stringify({
+        uid: profile.uid,
+        name: profile.name,
+        email: profile.email,
+        phone: profile.phone,
+        numero_compte: profile.numero_compte,
+        role: profile.role,
+      }),
     });
     return res.json();
   },

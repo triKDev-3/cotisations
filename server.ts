@@ -30,21 +30,21 @@ app.use(cors());
   });
 
   app.post('/api/users/sync', async (req, res) => {
-    const { uid, name, email, numero_compte, role } = req.body;
+    const { uid, name, email, numero_compte, role, phone } = req.body;
     const finalRole = (email === 'kodokoffikevin@gmail.com' || email === 'kodokoffkevin@gmail.com') ? 'admin' : role;
+    const safeEmail = email && email.trim() !== '' ? email : null;
     try {
       const existing = await db.query.users.findFirst({ where: eq(users.uid, uid) });
       if (existing) {
-        // Update if needed
-        await db.update(users).set({ name, email, numero_compte, role: finalRole }).where(eq(users.uid, uid));
+        await db.update(users).set({ name, email: safeEmail, numero_compte, role: finalRole, phone: phone || null }).where(eq(users.uid, uid));
         res.json({ ...existing, role: finalRole });
       } else {
-        const newUser = await db.insert(users).values({ uid, name, email, numero_compte, role: finalRole }).returning();
+        const newUser = await db.insert(users).values({ uid, name, email: safeEmail, numero_compte, role: finalRole, phone: phone || null }).returning();
         res.json(newUser[0]);
       }
     } catch (error) {
       console.error('API Error /users/sync:', error);
-      res.status(500).json({ error: 'Failed to sync user' });
+      res.status(500).json({ error: 'Failed to sync user', details: String(error) });
     }
   });
 
