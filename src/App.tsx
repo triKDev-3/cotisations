@@ -20,16 +20,27 @@ export default function App() {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
       if (firebaseUser) {
-        // Sync with Postgres API
-        const newProfile: UserProfile = {
-          uid: firebaseUser.uid,
-          name: firebaseUser.displayName || 'Utilisateur',
-          email: firebaseUser.email || '',
-          numero_compte: generateNumeroCompte(),
-          role: (firebaseUser.email === 'kodokoffikevin@gmail.com' || firebaseUser.email === 'kodokoffkevin@gmail.com') ? 'admin' : 'user',
-        };
-        const syncedProfile = await api.syncUser(newProfile);
-        setProfile(syncedProfile);
+        try {
+          const newProfile: UserProfile = {
+            uid: firebaseUser.uid,
+            name: firebaseUser.displayName || 'Utilisateur',
+            email: firebaseUser.email || undefined,
+            numero_compte: generateNumeroCompte(),
+            role: (firebaseUser.email === 'kodokoffikevin@gmail.com' || firebaseUser.email === 'kodokoffkevin@gmail.com') ? 'admin' : 'user',
+          };
+          const syncedProfile = await api.syncUser(newProfile);
+          setProfile(syncedProfile);
+        } catch (error) {
+          console.error('Erreur sync utilisateur:', error);
+          // On définit quand même un profil de base pour ne pas bloquer l'app
+          setProfile({
+            uid: firebaseUser.uid,
+            name: firebaseUser.displayName || 'Utilisateur',
+            email: firebaseUser.email || undefined,
+            numero_compte: '...',
+            role: 'user',
+          });
+        }
       } else {
         setProfile(null);
       }
