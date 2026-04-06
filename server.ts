@@ -10,14 +10,13 @@ import cors from 'cors';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-async function startServer() {
-  const app = express();
-  const PORT = 3000;
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-  app.use(express.json());
-  app.use(cors());
+app.use(express.json());
+app.use(cors());
 
-  // API Routes
+// API Routes
   
   // Users
   app.get('/api/users', async (req, res) => {
@@ -140,11 +139,15 @@ async function startServer() {
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== 'production') {
-    const vite = await createViteServer({
+    createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
+    }).then((vite) => {
+      app.use(vite.middlewares);
+      app.listen(process.env.PORT || 3000, '0.0.0.0', () => {
+        console.log(`Server running on http://localhost:${process.env.PORT || 3000}`);
+      });
     });
-    app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
@@ -153,9 +156,4 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-  });
-}
-
-startServer();
+export default app;
