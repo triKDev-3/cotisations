@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { auth, UserProfile, Cotisation, Retrait } from '../firebase';
+import { auth, UserProfile, Cotisation, Retrait, generateNumeroCompte } from '../firebase';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Plus, Users, Search, CreditCard, CheckCircle2, AlertCircle, Loader2, ArrowDownCircle, ArrowUpCircle, History } from 'lucide-react';
+import { Plus, Users, Search, CreditCard, CheckCircle2, AlertCircle, Loader2, ArrowDownCircle, ArrowUpCircle, History, UserPlus, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { api } from '../services/api';
 
@@ -20,6 +20,8 @@ export default function CollectorDashboard() {
   const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<'cotisations' | 'retraits'>('cotisations');
   const [showHistory, setShowHistory] = useState(false);
+  const [showCreateUserModal, setShowCreateUserModal] = useState(false);
+  const [newUser, setNewUser] = useState({ name: '', email: '', numero_compte: '' });
 
   const fetchData = async () => {
     try {
@@ -103,6 +105,28 @@ export default function CollectorDashboard() {
     setSearchTerm('');
   };
 
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      const profile: UserProfile = {
+        uid: `manual_${Date.now()}`,
+        name: newUser.name,
+        email: newUser.email,
+        role: 'user',
+        numero_compte: newUser.numero_compte || generateNumeroCompte(),
+      };
+      await api.syncUser(profile);
+      setShowCreateUserModal(false);
+      setNewUser({ name: '', email: '', numero_compte: '' });
+      fetchData();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div className="space-y-8">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -110,7 +134,14 @@ export default function CollectorDashboard() {
           <h1 className="text-2xl font-bold text-slate-900">Espace Collecteur</h1>
           <p className="text-slate-500">Enregistrez les cotisations et les retraits des membres.</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-3 flex-wrap">
+          <button
+            onClick={() => setShowCreateUserModal(true)}
+            className="flex items-center justify-center gap-2 bg-emerald-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-200 active:scale-95"
+          >
+            <UserPlus className="w-5 h-5" />
+            <span>Nouveau Membre</span>
+          </button>
           <button
             onClick={() => setShowModal('retrait')}
             className="flex items-center justify-center gap-2 bg-white border border-red-200 text-red-600 px-6 py-3 rounded-xl font-bold hover:bg-red-50 transition-all shadow-sm active:scale-95"
@@ -391,6 +422,65 @@ export default function CollectorDashboard() {
                     {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Confirmer l\'opération'}
                   </button>
                 </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Create User Modal */}
+      <AnimatePresence>
+        {showCreateUserModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+            >
+              <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+                <h3 className="text-xl font-bold text-slate-900">Nouveau Membre</h3>
+                <button onClick={() => setShowCreateUserModal(false)} className="text-slate-400 hover:text-slate-600">
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              <form onSubmit={handleCreateUser} className="p-6 space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">Nom Complet</label>
+                  <input
+                    type="text"
+                    required
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                    value={newUser.name}
+                    onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">Email (Optionnel)</label>
+                  <input
+                    type="email"
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                    value={newUser.email}
+                    onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">Numéro de Compte</label>
+                  <input
+                    type="text"
+                    placeholder="Laisser vide pour générer"
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                    value={newUser.numero_compte}
+                    onChange={(e) => setNewUser({ ...newUser, numero_compte: e.target.value })}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="w-full bg-emerald-600 text-white p-4 rounded-xl font-bold hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-200 active:scale-95 flex items-center justify-center gap-2 mt-4"
+                >
+                  {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Créer le Membre'}
+                </button>
               </form>
             </motion.div>
           </div>
