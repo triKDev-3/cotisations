@@ -1,14 +1,9 @@
 import express from 'express';
-import { createServer as createViteServer } from 'vite';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { db } from './src/db/index';
 import { users, cotisations, retraits } from './src/db/schema';
 import { eq, desc, sql } from 'drizzle-orm';
 import cors from 'cors';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '3000', 10);
@@ -139,13 +134,15 @@ app.use(cors());
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== 'production') {
-    createViteServer({
-      server: { middlewareMode: true },
-      appType: 'spa',
-    }).then((vite) => {
-      app.use(vite.middlewares);
-      app.listen(PORT, '0.0.0.0', () => {
-        console.log(`Server running on http://localhost:${PORT}`);
+    import('vite').then(({ createServer: createViteServer }) => {
+      createViteServer({
+        server: { middlewareMode: true },
+        appType: 'spa',
+      }).then((vite) => {
+        app.use(vite.middlewares);
+        app.listen(PORT, '0.0.0.0', () => {
+          console.log(`Server running on http://localhost:${PORT}`);
+        });
       });
     });
   } else {
